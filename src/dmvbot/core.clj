@@ -58,23 +58,27 @@
              :body (json/generate-string me-json)}]
     (-> req http/request deref :body (json/parse-string true))))
 
+(defn check-location [[loc-name loc-id]]
+  (let [dates (fetch-dates loc-id)]
+    (when (seq dates)
+      (for [date (map :date dates)
+            :let [times (fetch-times loc-id date)]
+            :when (seq times)
+            :let [time (:time (last times))
+                  res (reserve! loc-id date time)
+                  res-id (:publicId res)]]
+        (do (println "Found reservation at " loc-name "- Confirming...")
+            (confirm! res-id))))))
+
 (defn check-all []
-  (for [[loc-name loc-id] locations
-        :let [dates (fetch-dates loc-id)]
-        :when (seq dates)
-        obj dates
-        :let [date (:date obj)
-              times (fetch-times loc-id date)]
-        :when (seq times)
-        :let [time (:time (last times))
-              res (reserve! loc-id date time)
-              res-id (:publicId res)]]
-    (do (println "Found reservation at " loc-name "- Confirming...")
-        (confirm! res-id))))
+  (->> locations
+       (map #(future (check-location %)))
+       doall
+       (keep deref)))
 
 (defn -main []
   (while true
-    (println (doall (check-all)))))
+    (println (check-all))))
 
 (comment
   (check-all)
