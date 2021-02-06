@@ -1,0 +1,1 @@
+-m mach.pack.alpha.capsule deps.edn dist/artbot.jar
