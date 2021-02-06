@@ -34,7 +34,7 @@
                                     }
                                   reservation (json/read-str (:body @(client/post (str "https://nysdmvqw.us.qmatic.cloud/qwebbook/rest/schedule/branches/" (val pair) "/services/" service_id "/dates/" date "/times/" time "/reserve") 
                                                                 {:accept :json
-                                                                :body (json/write-str req_json)
+                                                                :body (json/write-str req_json) ; not sure if i will have to add a content-type: application/json header, or not encode the json before sending
                                                                 }))
                                   )
                                   res_id (get reservation "publicId")
